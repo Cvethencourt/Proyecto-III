@@ -1,2 +1,851 @@
-Inicio
-Fin.
+programa hotelidotel;
+
+usas
+  SysUtils, Crt;
+
+constantes
+  
+  children_max = 5;
+  grupom = 25;
+tipo
+  clientData = registro;
+    allName: arreglo[1..grupom] de cadena;
+    mail: arreglo[1..grupom] de cadena;
+    celPhone: arreglo[1..grupom] de cadena;
+    cedula: arreglo[1..grupom] de cadena;
+    children: arreglo[1..children_max] de cadena;
+    edad: arreglo[1..children_max] de enteros;
+    roomNum: cadena;
+    roomType: cadena;
+    personAmount: entero;
+    childrenAmount: entero;
+    days : entero;
+  fin;
+
+  data = archivo de clientData;
+
+variablesiablesiablesiables
+parejaData: data;
+individualData: data;
+acData: data;
+acliente: clientData;
+i, x: entero;
+edad: entero;
+
+procedimiento bienvenida;
+
+inicio
+	imprimir ('Bienvenid@ a Lidotel Hotel Boutique Margarita');
+	imprimir ('Podra realizar reservaciones, consultar reservaciones, entre otras');
+	imprimir ('funciones de utilidad...');
+	imprimir ('Este hotel se encuentra comodamente equipado para atfiner a hastados sus ');
+	imprimir ('clientes, esperamos disfrute su estadia y pueda relajarse y aprovechar');
+	imprimir ('de hastado lo que Lidotel tiene para usted ');
+	imprimir ('');
+	Leer tecla;
+	limpiar pantalla;
+fin;
+
+funcion ContainsNumbers(constantes str: cadena): boleano;
+variablesiablesiablesiables
+  i: entero;
+inicio
+  para i := 1 hasta Length(str) hacer
+  inicio
+    si str[i] en ['0'..'9'] enhastances
+    inicio
+      ContainsNumbers := verdadero;
+      Exit;
+    fin;
+  fin;
+  ContainsNumbers := Falso;
+fin;
+
+procedimiento fileOpen(variablesiablesiablesiables parejaData: data; variablesiablesiablesiables individualData: data; variablesiablesiablesiables acData: data);
+inicio
+  (parejaData, 'pareja.dat');
+  Asignar(individualData, 'individual.dat');
+  Asignar(acData, 'acompanados.dat');
+  {$I-}
+  Reiniciar(parejaData);
+  Reiniciar(individualData);
+  Reiniciar(acData);
+  {$I+}
+  si IOResult <> 0 enhastances
+  inicio
+    Rewrite(parejaData);
+    Rewrite(individualData);
+    Rewrite(acData);
+  fin;
+fin;
+
+funcion existeNumHabitacion(roomNum: cadena; variablesiablesiablesiables parejaData: data; variablesiablesiablesiables individualData: data; variablesiablesiablesiables acData: data): boleano;
+variablesiablesiablesiables
+  fileRun: data;
+inicio
+  Asignar(fileRun, 'Pareja.dat');
+  Reiniciar(fileRun);
+  si IOResult = 0 enhastances
+  inicio
+    mientras no EOF(fileRun) hacer
+    inicio
+      leer(fileRun, acliente);
+      si acliente.roomNum = roomNum enhastances
+      inicio
+        Cerrar(fileRun);
+        existeNumHabitacion := verdadero;
+        Exit;
+      fin;
+    fin;
+    Cerrar(fileRun);
+  fin;
+
+  Asignar(fileRun, 'Individual.dat');
+  Reiniciar(fileRun);
+  si IOResult = 0 enhastances
+  inicio
+    mientras no EOF(fileRun) hacer
+    inicio
+      leer(fileRun, acliente);
+      si acliente.roomNum = roomNum enhastances
+      inicio
+        Cerrar(fileRun);
+        existeNumHabitacion := verdadero;
+        Exit;
+      fin;
+    fin;
+    Cerrar(fileRun);
+  fin;
+
+  Assignar(fileRun, 'Acompanados.dat');
+  Reiniciar(fileRun);
+  si IOResult = 0 enhastances
+  inicio
+    mientras no EOF(fileRun) hacer
+    inicio
+      leer(fileRun, acliente);
+      si acliente.roomNum = roomNum enhastances
+      inicio
+        Cerrar(fileRun);
+        existeNumHabitacion := verdadero;
+        Exit;
+      fin;
+    fin;
+    Cerrar(fileRun);
+  fin;
+
+  existeNumHabitacion := Falso;
+fin;
+
+procedimiento showRooms(roomType: cadena);
+inicio
+  caso roomType de
+    'S':
+      inicio
+       imprimir('Habitacion Sencilla:');
+       imprimir('Esta habitacion es para una sola persona.');
+       imprimir('Amplia y conparatable habitacion decorada con un estilo vanguardista,');
+       imprimir('cama Lidotel Royal King con sabanas de algodon egipcio, soporte para ');
+       imprimir('iPod con reloj despertador, TV 32 HD Plasma con cable, bano con ducha,');
+       imprimir(' cafetera electrica, nevera ejecutiva, caja electronica de seguridad ');
+       imprimir('y secador de cabello.');
+      fin;
+    'T':
+      inicio
+        imprimir('Suite:');
+        imprimir('Esta habitacion es para una pareja.');
+        imprimir('Calida y conparatable habitacion decorada con un estilo vanguardista,');
+        imprimir('100% libre de humo, Cama Lidotel Royal King, con reloj despertador,');
+        imprimir('TV 32 HD Plasma con cable, 2 banos con ducha, cafetera electrica, ');
+        imprimir('nevera ejecutiva, caja electronica de seguridad y secador de cabello,');
+        imprimir(' armario adicional amplio y area separada con 2 sofa-cama individuales.');
+      fin;
+    'D':
+      inicio
+        imprimir('Habitacion Doble:');
+        imprimir('Esta habitacion es para dos personas.');
+        imprimir('Amplia y conparatable habitacion decorada con un estilo vanguardista,');
+        imprimir('Dos Camas Lidotel Full con sabanas de algodon egipcio, soporte para');
+        imprimir('iPod con reloj despertador, TV 32 HD Plasma con cable, bano con ducha,');
+        imprimir('cafetera electrica, nevera ejecutiva, caja electronica de seguridad ');
+        imprimir('secador de cabello.');
+      fin;
+    'F':
+      inicio
+        imprimir('Family Room:');
+        imprimir('Esta habitacion es para familias.');
+        imprimir('Calida y conparatable habitacion decorada con un estilo vanguardista,');
+        imprimir('100% libre de humo, cama Lidotel Royal King, con reloj despertador,');
+        imprimir('TV 32” HD Plasma con cable, bano con ducha, cafetera electrica, nevera');
+        imprimir('ejecutiva, caja electronica de seguridad y secador de cabello,');
+        imprimir('armario adicional amplio, una habitacion separada con 2 camas full,');
+        imprimir('bano con ducha.');
+      fin;
+  fin;
+fin;
+
+procedimiento availableRooms;
+inicio
+  imprimir('Habitaciones Disponibles:');
+  imprimir('S. Sencilla');
+  imprimir('T. Suite');
+  imprimir('D. Doble');
+  imprimir('F. Family Room');
+fin;
+
+funcion ContainsAtSymbol(mail: cadena): boleano;
+inicio
+  ContainsAtSymbol := Pos('@', mail) > 0;
+fin;
+
+procedimiento addData(variablesiablesiablesiables parejaData: data; variablesiablesiablesiables individualData: data; variablesiablesiablesiables acData: data);
+variablesiablesiablesiables
+  acliente : clientData;
+  hospedajeType: caracter;
+  roomType: caracter;
+  roomNum: cadena;
+  numAdulhastas: entero;
+  i, x: entero;
+inicio
+  si IOresult = 0 enhastances
+  inicio
+    Cerrar(parejaData);
+    Cerrar(individualData);
+    Cerrar(acData);
+  fin;
+  limpiar pantalla;
+  imprimir('----- Agregar Registro -----');
+
+  // Tipo de Hospedaje
+  mientras no (hospedajeType en ['I', 'P', 'A']) hacer
+  inicio
+    imprimir('Ingrese el tipo de hospedaje:');
+    imprimir('I. Individual');
+    imprimir('P. Pareja');
+    imprimir('A. Acompanados');
+    imprimir('Opcion: ');
+    hospedajeType := UpCase(Leer tecla);
+    imprimir(hospedajeType);
+    limpiar pantalla;
+  fin;
+
+  // Validaciones y datos adicionales para Acompanados
+  si hospedajeType = 'A' entonces
+  inicio
+    Asign(acData, 'Acompanados.dat');
+    Reiniciar(acData);
+    imprimir('Datos adicionales para Acompanados:');
+    imprimir;
+
+    repetir
+      imprimir('¿Cuantos adultos se hospedaran? ');
+      leer(numAdultos);
+      acliente.childrenAmount := numAdultos;
+    hasta numAdultos > 0;
+
+    para i := 1 hasta numAdultos hacer
+    inicio
+      imprimir;
+      imprimir('Datos del adulto ', i);
+      imprimir('Numero de cedula: ');
+      leer(acliente.cedula[i]);
+      imprimir('Nombre y apellido: ');
+      leer(acliente.allName[i]);
+      imprimir('Email: ');
+      leer(acliente.mail[i]);
+      imprimir('Telefono: ');
+      leer(acliente.celPhone[i]);
+    fin;
+
+    repetir
+      imprimir;
+      imprimir('¿Cuantos ninyos se hospedaran? ');
+      leer(x);
+      acliente.personAmount := x;
+    hasta x >= 0;
+
+    para i := 1 hasta x hacer
+    inicio
+      imprimir;
+      imprimir('Datos del ninyo ', i);
+      imprimir('Nombre y apellido: ');
+      leer(acliente.children[i]);
+      imprimir('Edad: ');
+      leer(acliente.edad[i]);
+    fin;
+
+    Cerrar(acData);
+  fin
+  si no si hospedajeType = 'P' entonces
+  inicio
+    Asignar(parejaData, 'Pareja.dat');
+    Reiniciar(parejaData);
+    imprimir('Datos para Pareja:');
+    imprimir;
+    imprimir('Proporcione el primer nombre y apellido: ');
+    leer(acliente.allName[1]);
+    imprimir('Proporcione el segundo nombre y apellido: ');
+    leer(acliente.allName[2]);
+    imprimir('Proporcione el numero de cedula de ', acliente.allName[1], ': ');
+    leer(acliente.cedula[1]);
+    imprimir('Proporcione el numero de cedula de ', acliente.allName[2], ': ');
+    leer(acliente.cedula[2]);
+    imprimir('Proporcione el mail de ', acliente.allName[1], ': ');
+    leer(acliente.mail[1]);
+    imprimir('Proporcione el mail de ', acliente.allName[2], ': ');
+    leer(acliente.mail[2]);
+    imprimir('Proporcione el telefono de ', acliente.allName[1], ': ');
+    leer(acliente.celPhone[1]);
+    imprimir('Proporcione el telefono de ', acliente.allName[2], ': ');
+    leer(acliente.celPhone[2]);
+
+    Cerrar(parejaData);
+  fin
+  si no
+  inicio
+    Asignar(individualData, 'Individual.dat');
+    Reiniciar(individualData);
+
+    // Inicializar variablesiablesiablesiablesiables para hospedaje individual
+    acliente.roomNum := '';
+    acliente.roomType := '';
+    acliente.allName[1] := '';
+    acliente.cedula[1] := '';
+    acliente.mail[1] := '';
+    acliente.celPhone[1] := '';
+
+    // Nombre y Apellido
+    imprimir('Nombre y apellido: ');
+    leer(acliente.allName[1]);
+    // Cedula
+    repetir
+      imprimir('Numero de cedula: ');
+      leer(acliente.cedula[1]);
+    hasta ContainsNumbers(acliente.cedula[1]);
+
+    // Telefono
+    imprimir('Telefono: ');
+    leer(acliente.celPhone[1]);
+
+    // Email
+    imprimir('Email: ');
+    leer(acliente.mail[1]);
+
+    Cerrar(individualData);
+  fin;
+
+  // Mostrar inparamacion de las habitaciones disponibles
+  mientras no (roomType en ['S', 'T', 'D', 'F']) hacer
+  inicio
+    limpiar pantalla;
+    availableRooms;
+    imprimir('');
+    imprimir('Seleccione una opcion: ');
+    roomType := UpCase(Leer tecla);
+    imprimir(roomType);
+  fin;
+
+  // Mostrar inparamacion de la habitacion seleccionada
+  showRooms(roomType);
+
+  // Solicitar numero de habitacion y validar disponibilidad
+  repetir;
+    imprimir('Ingrese el numero de habitacion: ');
+    leer(roomNum);
+    si existeNumHabitacion(roomNum, parejaData, individualData, acData) entonces
+    inicio
+      imprimir('El numero de habitacion ya esta ocupado. Por favor, seleccione otro.');
+      leer;
+    fin;
+  hasta no existeNumHabitacion(roomNum, parejaData, individualData, acData);
+
+  // Guardar datos en el archivo correspondiente
+  acliente.roomNum := roomNum;
+  acliente.roomType := roomType;
+
+  caso hospedajeType de
+    'I':
+      inicio
+        Asignar(individualData, 'Individual.dat');
+        Reiniciar(individualData);
+        Seek(individualData, FileSize(individualData));
+        imprimir(individualData, acliente);
+        Cerrar(individualData);
+      fin;
+    'P':
+      inicio
+        Asignar(parejaData, 'Pareja.dat');
+        Reiniciar(parejaData);
+        Seek(parejaData, FileSize(parejaData));
+        imprimir(parejaData, acliente);
+        Cerrar(parejaData);
+      fin;
+    'A':
+      inicio
+        Asignar(acData, 'Acompanados.dat');
+        Reiniciar(acData);
+        Seek(acData, FileSize(acData));
+        imprimir(acData, acliente);
+        Cerrar(acData);
+      fin;
+  fin;
+
+  imprimir;
+  imprimir('Registro agregado exitosamente.');
+  leer;
+fin;
+
+procedimiento showData(variablesiablesiablesiables parejaData: data; variablesiablesiablesiables individualData: data; variablesiablesiablesiables acData: data);
+variablesiablesiablesiables
+  fileRun: data;
+  acliente: clientData;
+  option: caracter;
+  key: caracter;
+inicio
+  si IOresult = 0 entonces
+  inicio
+    Cerrar(parejaData);
+    Cerrar(individualData);
+    Cerrar(acData);
+  fin;
+  limpiar pantalla;
+  imprimir('***** Mostrar Datos *****');
+  imprimir('T. Todos');
+  imprimir('I. Individual');
+  imprimir('P. Pareja');
+  imprimir('A. Acompanados');
+  imprimir('Seleccione una opcion: ');
+  option := UpCase(Leer tecla);
+  imprimir(option);
+  imprimir;
+
+  caso option de
+    'T':
+      inicio
+        Asignar(fileRun, 'Individual.dat');
+        Reiniciar(fileRun);
+        imprimir('***** Hospedajes Individuales *****');
+        imprimir('Cedula | Nombre y Apellido | Email | Telefono | Tipo de Habitacion | Habitacion | Noches');
+        mientras no EOF(fileRun) hacer
+        inicio
+          leer(fileRun, acliente);
+          imprimir(acliente.cedula[1], ' | ');
+          imprimir(acliente.allName[1], ' | ');
+          imprimir(acliente.mail[1], ' | ');
+          imprimir(acliente.celPhone[1], ' | ');
+          imprimir(acliente.roomType, ' | ');
+          imprimir(acliente.roomNum, ' | ');
+          imprimir(acliente.days);
+        fin;
+        Cerrar(fileRun);
+
+        Asignar(fileRun, 'Pareja.dat');
+        Reiniciar(fileRun);
+        imprimir('***** Hospedajes en Pareja *****');
+        imprimir('Cedula | Nombre y Apellido | Email | Telefono | Tipo de Habitacion | Habitacion | Noches');
+        mientras no EOF(fileRun) hacer
+        inicio
+          leer(fileRun, acliente);
+          imprimir(acliente.cedula[1], ' | ');
+          imprimir(acliente.allName[1], ' | ');
+          imprimir(acliente.mail[1], ' | ');
+          imprimir(acliente.celPhone[1], ' | ');
+          imprimir(acliente.roomType, ' | ');
+          imprimir(acliente.roomNum, ' | ');
+          imprimir(acliente.days);
+          imprimir(acliente.cedula[2], ' | ');
+          imprimir(acliente.allName[2], ' | ');
+          imprimir(acliente.mail[2], ' | ');
+          imprimir(acliente.celPhone[2], ' | ');
+          imprimir(acliente.roomType, ' | ');
+          imprimir(acliente.roomNum, ' | ');
+          imprimir(acliente.days);
+        fin;
+        Cerrar(fileRun);
+
+        Asignar(fileRun, 'Acompanados.dat');
+        Reiniciar(fileRun);
+        imprimir('***** Hospedajes Acompanados *****');
+        imprimir('Cedula | Nombre y Apellido | Email | Telefono | Tipo de Habitacion | Habitacion | Noches');
+        mientras no EOF(fileRun) hacer
+        inicio
+          leer(fileRun, acliente);
+          para i := 1 hasta acliente.childrenAmount hacer
+          inicio
+            imprimir(acliente.cedula[i], ' | ');
+            imprimir(acliente.allName[i], ' | ');
+            imprimir(acliente.mail[i], ' | ');
+            imprimir(acliente.celPhone[i], ' | ');
+            imprimir(acliente.roomType, ' | ');
+            imprimir(acliente.roomNum, ' | ');
+            imprimir(acliente.days, ' | ');
+          fin;
+        fin;
+        Cerrar(fileRun);
+      fin;
+    'I':
+      inicio
+        asignar(fileRun, 'Individual.dat');
+        Reiniciar(fileRun);
+        imprimir('***** Hospedajes Individuales *****');
+        imprimir('Cedula | Nombre y Apellido | Email | Telefono | Tipo de Habitacion | Habitacion | Noches');
+        mientras no EOF(fileRun) hacer
+        inicio
+          leer(fileRun, acliente);
+          imprimir(acliente.cedula[1], ' | ');
+          imprimir(acliente.allName[1], ' | ');
+          imprimir(acliente.mail[1], ' | ');
+          imprimir(acliente.celPhone[1], ' | ');
+          imprimir(acliente.roomType, ' | ');
+          imprimir(acliente.roomNum, ' | ');
+          imprimir(acliente.days, ' | ');
+        fin;
+        Cerrar(fileRun);
+      fin;
+    'P':
+      inicio
+        Asignar(fileRun, 'Pareja.dat');
+        Reiniciar(fileRun);
+        imprimir('***** Hospedajes en Pareja *****');
+        imprimir('Cedula | Nombre y Apellido | Email | Telefono | Tipo de Habitacion | Habitacion | Noches');
+        mientras no EOF(fileRun) hacer
+        inicio
+          leer(fileRun, acliente);
+          imprimir(acliente.cedula[1], ' | ');
+          imprimir(acliente.allName[1], ' | ');
+          imprimir(acliente.mail[1], ' | ');
+          imprimir(acliente.celPhone[1], ' | ');
+          imprimir(acliente.roomType, ' | ');
+          imprimir(acliente.roomNum, ' | ');
+          imprimir(acliente.days);
+          imprimir(acliente.cedula[2], ' | ');
+          imprimir(acliente.allName[2], ' | ');
+          imprimir(acliente.mail[2], ' | ');
+          imprimir(acliente.celPhone[2], ' | ');
+          imprimir(acliente.roomType, ' | ');
+          imprimir(acliente.roomNum, ' | ');
+          imprimir(acliente.days, ' | ');
+        fin;
+        Cerrar(fileRun);
+      fin;
+    'A':
+      inicio
+        Asignar(fileRun, 'Acompanados.dat');
+        Reiniciar(fileRun);
+        imprimir('***** Hospedajes Acompanados *****');
+        imprimir('Cedula | Nombre y Apellido | Email | Telefono | Tipo de Habitacion | Habitacion | Noches');
+        mientras no EOF(fileRun) hacer
+        inicio
+          leer(fileRun, acliente);
+          para i := 1 hasta acliente.childrenAmount hacer
+          inicio
+            imprimir(acliente.cedula[i], ' | ');
+            imprimir(acliente.allName[i], ' | ');
+            imprimir(acliente.mail[i], ' | ');
+            imprimir(acliente.celPhone[i], ' | ');
+            imprimir(acliente.roomType, ' | ');
+            imprimir(acliente.roomNum, ' | ');
+            imprimir(acliente.days, ' | ');
+          fin;
+        fin;
+        Cerrar(fileRun);
+      fin;
+  fin;
+
+  imprimir('Presione cualquier key para volver al menu principal.');
+  Leer tecla;
+fin;
+
+procedimiento searchData(variablesiablesiablesiables parejaData: data; variablesiablesiablesiables individualData: data; variablesiablesiablesiables acData: data);
+variablesiablesiablesiables
+  fileRun: data;
+  searchCedula: cadena;
+  founds: boleano;
+  acliente: clientData;
+
+  procedimiento dataClientPrint(constantes acliente: clientData; i: entero);
+  inicio
+    imprimir('| ', acliente.cedula[i], ' | ', acliente.allName[i], ' | ', acliente.mail[i], ' | ', acliente.celPhone[i], ' | ', acliente.roomType, ' | ', acliente.roomNum, ' | ', acliente.days, ' |');
+  fin;
+
+inicio
+  si IOresult = 0 entonces
+  inicio
+    Cerrar(parejaData);
+    Cerrar(individualData);
+    Cerrar(acData);
+  fin;
+  limpiar pantalla;
+  imprimir('------ Buscar Datos ------');
+  imprimir('Ingrese el numero de cedula a buscar: ');
+  leer(searchCedula);
+  imprimir;
+
+  founds := Falso;
+
+  // Buscar en Hospedajes Individuales
+  Asignar(fileRun, 'Individual.dat');
+  Reiniciar(fileRun);
+  imprimir('***** Resultados de la busqueda en Hospedajes Individuales *****');
+  mientras no EOF(fileRun) hacer
+  inicio
+    leer(fileRun, acliente);
+    si acliente.cedula[1] = searchCedula entonces
+    inicio
+      imprimir('Cedula | Nombre y Apellido | Email | Telefono | Tipo de Habitacion | Habitacion | Noches');
+      dataClientPrint(acliente, 1);
+      founds := verdadero;
+    fin;
+  fin;
+  Cerrar(fileRun);
+
+  // Buscar en Hospedajes en Pareja
+  Asignar(fileRun, 'Pareja.dat');
+  Reiniciar(fileRun);
+  imprimir('***** Resultados de la busqueda en Hospedajes en Pareja *****');
+  mientras no EOF(fileRun) hacer
+  inicio
+    leer(fileRun, acliente);
+    si (acliente.cedula[1] = searchCedula) o (acliente.cedula[2] = searchCedula) entonces
+    inicio
+      imprimir('Cedula | Nombre y Apellido | Email | Telefono | Tipo de Habitacion | Habitacion | Noches');
+      dataClientPrint(acliente, 1);
+      dataClientPrint(acliente, 2);
+      founds := verdadero;
+    fin;
+  fin;
+  Cerrar(fileRun);
+
+  // Buscar en Hospedajes Acompanados (Grupo)
+  Asignar(fileRun, 'Acompanados.dat');
+  Reiniciar(fileRun);
+  mientras no EOF(fileRun) hacer
+  inicio
+    leer(fileRun, acliente);
+    si acliente.roomNum = searchCedula entonces
+    inicio
+      imprimir('***** Resultados de la busqueda en Hospedajes Acompanados *****');
+      imprimir('Cedula | Nombre y Apellido | Email | Telefono | Tipo de Habitacion | Habitacion | Noches');
+      para i := 1 hasta acliente.childrenAmount hacer
+      inicio
+        dataClientPrint(acliente, i);
+      fin;
+      founds := verdadero;
+    fin;
+  fin;
+  Cerrar(fileRun);
+
+  si no founds enhastances
+  inicio
+    imprimir('No se encontraron resultados para la cedula especsiicada.');
+  fin;
+
+  leer;
+fin;
+
+pocedimiento checkOutBill(variablesiablesiablesiables parejaData: data; variablesiablesiablesiables individualData: data; variablesiablesiablesiables acData: data);
+variablesiablesiablesiables
+  i, j, x: entero;
+  cedula: cadena;
+  foundit: boleano;
+  fileRun: data;
+  cliente: clientData;
+  roomType: cadena;
+
+  funcion roomTypeObtain(tipo: caracter): cadena;
+  variablesiablesiablesiables
+    rtype: cadena;
+  inicio
+    caso tipode
+      'S': rtype := 'Sencilla';
+      'T': rtype := 'Suite';
+      'F': rtype := 'Family Room';
+      'D': rtype := 'Doble';
+      si no
+        rtype := 'Desconocido';
+    fin;
+    roomTypeObtain := rtype;
+  fin;
+
+  funcion price4day(roomType: cadena): entero;
+  variablesiablesiablesiables
+    price: entero;
+  inicio
+    caso roomType[1] de
+      'S': price := 60; // Sencilla
+      'T': price := 300; // Suite
+      'F': price := 200; // Family Room
+      'D': price := 120; // Doble
+      si no
+        price := 0; // Tipo de habitacion invalido
+    fin;
+    price4day := price;
+  fin;
+
+inicio
+  si IOresult = 0 enhastances
+  inicio
+    Cerrar(parejaData);
+    Cerrar(individualData);
+    Cerrar(acData);
+  fin;
+  
+  limpiar pantalla;
+  imprimir('----- Facturacion por Cedula -----');
+  imprimir('Ingrese el numero de cedula: ');
+  leer(cedula);
+
+  // Buscar en el archivo Individual.dat
+  Asignar(fileRun, 'Individual.dat');
+  Reiniciar(fileRun);
+  foundit := Falso;
+  mientras no EOF(fileRun) hacer
+  inicio
+    leer(fileRun, cliente);
+    si cliente.cedula[1] = cedula enhastances
+    inicio
+      imprimir('Facturacion para Cliente Individual:');
+      imprimir('Cedula: ', cliente.cedula[1]);
+      imprimir('Nombre y apellido: ', cliente.allName[1]);
+      imprimir('Email: ', cliente.mail[1]);
+      imprimir('Telefono: ', cliente.celPhone[1]);
+      imprimir('Numero de habitacion: ', cliente.roomNum);
+      roomType := roomTypeObtain(cliente.roomType[1]);
+      imprimir('Tipo de habitacion: ', roomType);
+      imprimir('Noches: ', cliente.days);
+      imprimir('Precio por noche: ', price4day(roomType));
+      imprimir('hastatal a pagar: ', cliente.days * price4day(roomType));
+      foundit := verdadero;
+      romper ciclo;
+    fin;
+  fin;
+  Cerrar(fileRun);
+
+  si no foundit enhastances
+  inicio
+    // Buscar en el archivo Pareja.dat
+    Asignar(fileRun, 'Pareja.dat');
+    Reiniciar(fileRun);
+    foundit := Falso;
+    mientras no EOF(fileRun) hacer
+    inicio
+      leer(fileRun, cliente);
+      si (cliente.cedula[1] = cedula) o (cliente.cedula[2] = cedula) enhastances
+      inicio
+        imprimir('Facturacion para Cliente en Pareja:');
+        imprimir('Primer nombre y apellido: ', cliente.allName[1]);
+        imprimir('Segundo nombre y apellido: ', cliente.allName[2]);
+        imprimir('Email de ', cliente.allName[1], ': ', cliente.mail[1]);
+        imprimir('Email de ', cliente.allName[2], ': ', cliente.mail[2]);
+        imprimir('Telefono de ', cliente.allName[1], ': ', cliente.celPhone[1]);
+        imprimir('Telefono de ', cliente.allName[2], ': ', cliente.celPhone[2]);
+        imprimir('Numero de cedula de ', cliente.allName[1], ': ', cliente.cedula[1]);
+        imprimir('Numero de cedula de ', cliente.allName[2], ': ', cliente.cedula[2]);
+        imprimir('Numero de habitacion: ', cliente.roomNum);
+        roomType := roomTypeObtain(cliente.roomType[1]);
+        imprimir('Tipo de habitacion: ', roomType);
+        imprimir('Noches: ', cliente.days);
+        imprimir('Precio por noche: ', price4day(roomType));
+        imprimir('hastatal a pagar: ', cliente.days * price4day(roomType));
+        foundit := verdadero;
+        romper ciclo;
+      fin;
+    fin;
+    Cerrar(fileRun);
+  fin;
+
+  si no foundit enhastances
+  inicio
+    // Buscar en el archivo Acompanados.dat
+    Asignar(fileRun, 'Acompanados.dat');
+    Reiniciar(fileRun);
+    foundit := Falso;
+    mientras no EOF(fileRun) hacer
+    inicio
+      leer(fileRun, cliente);
+      para i := 1 hasta cliente.childrenAmount hacer
+      inicio
+        si cliente.cedula[i] = cedula enhastances
+        inicio
+          imprimir('Facturacion para Cliente Acompanado:');
+          imprimir('Cantidad de adulhastas: ', cliente.childrenAmount);
+          para j := 1 hasta cliente.childrenAmount hacer
+          inicio
+            imprimir('Adulhasta ', i);
+            imprimir('Numero de cedula: ', cliente.cedula[i]);
+            imprimir('Nombre y apellido: ', cliente.allName[i]);
+            imprimir('Email: ', cliente.mail[i]);
+            imprimir('Telefono: ', cliente.celPhone[i]);
+          fin;
+          imprimir('Cantidad de ninyos: ', cliente.personAmount);
+          para x := 1 hasta cliente.personAmount hacer
+          inicio
+            imprimir('Ninyo ', i);
+            imprimir('Nombre y apellido: ', cliente.children[i]);
+            imprimir('Edad: ', cliente.edad[i]);
+          fin;
+          imprimir('Numero de habitacion: ', cliente.roomNum);
+          roomType := roomTypeObtain(cliente.roomType[1]);
+          imprimir('Tipo de habitacion: ', roomType);
+          imprimir('Noches: ', cliente.days);
+          imprimir('Precio por noche: ', price4day(roomType));
+          imprimir('hastatal a pagar: ', cliente.days * price4day(roomType));
+          foundit := verdadero;
+          romper ciclo;
+        fin;
+      fin;
+      si foundit enhastances
+        romper ciclo;
+    fin;
+    Cerrar(fileRun);
+  fin;
+
+  si no foundit enhastances
+    imprimir('No se encontro ningun cliente con el numero de cedula proporcionado.');
+
+  leer;
+fin;
+
+procedimiento menu(variablesiablesiablesiablesiables parejaData: data; variablesiablesiablesiablesiables individualData: data; variablesiablesiablesiablesiables acData: data);
+variablesiablesiablesiablesiables
+  option: caracter;
+inicio
+  repetir
+    limpiar pantalla;
+imprimir('|       Menu principal      |');
+imprimir('| 1. Agregar reservacion    |');
+imprimir('| 2. Mostrar reservacion    |');
+imprimir('| 3. Buscar reservacion     |');
+imprimir('| 4. Facturar               |');
+imprimir('| 0. Salir                  |');
+    imprimir('Seleccione una opcion: ');
+    option := Leer tecla;
+    imprimir(option);
+    caso option de
+      '1':inicio
+      addData(parejaData, individualData, acData);
+      fileOpen(parejaData, individualData, acData);
+        fin;
+      '2':inicio
+        showData(parejaData, individualData, acData);
+        fileOpen(parejaData, individualData, acData);
+        fin;
+      '3': 
+      inicio
+
+      searchData(parejaData, individualData, acData);
+      fileOpen(parejaData, individualData, acData);
+      fin;
+      '4': inicio
+          checkOutBill(parejaData, individualData, acData);
+          fileOpen(parejaData, individualData, acData);
+      fin;
+    fin;
+  hasta option = '0';
+fin;
+
+inicio
+  bienvenida;
+  fileOpen(parejaData, individualData, acData);
+  menu(parejaData, individualData, acData);
+fin.
